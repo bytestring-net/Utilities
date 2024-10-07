@@ -1,0 +1,21 @@
+#====================#
+#=== PACKAGE INFO ===#
+
+[package]
+  name = "logs"
+  version.workspace = true
+  edition.workspace = true
+
+#===============================#
+#=== DEPENDENCIES & FEATURES ===#
+
+[dependencies]
+  tracing            = { workspace = true }
+  tracing-subscriber = { workspace = true }
+  indicatif          = { workspace = true }
+  tracing-indicatif  = { workspace = true }
+
+  reqwest            = { workspace = true, optional = true }
+
+[features]
+  reqwest = ["dep:reqwest"]

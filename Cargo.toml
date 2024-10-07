@@ -1,0 +1,56 @@
+#======================#
+#=== WORKSPACE INFO ===#
+
+[workspace]
+  resolver = "2"
+  members = ["crates/*"]
+
+[workspace.package]
+  version = "0.1.0"
+  edition = "2021"
+
+#========================#
+#=== PACKAGE SETTINGS ===#
+
+[profile.dev]
+  debug = 0
+  strip = "debuginfo"
+  opt-level = 0
+
+[profile.dev.package."*"]
+  opt-level = 2
+
+[profile.release]
+  opt-level = 3
+  panic = 'abort'
+  debug = 0
+  strip = true
+  lto = "thin"
+  codegen-units = 1
+
+#===============================#
+#=== DEPENDENCIES & FEATURES ===#
+
+[workspace.dependencies]
+  # CRATES
+  files              = { path = "crates/files", version = "0.1.0" }
+  logs               = { path = "crates/logs", version = "0.1.0" }
+
+  # NETWORK
+  reqwest            = { version = "*" }
+
+  # UTILITIES
+  thiserror          = { version = "*" }
+  zip                = { version = "*" }
+
+  # SERIALIZATION
+  serde              = { version = "*", features = ["derive"] }
+  serde_json         = { version = "*", features = ["arbitrary_precision"] }
+  bincode            = { version = "*" }
+  toml               = { version = "*" }
+
+  # TERMINAL LOGS
+  tracing            = { version = "*" }
+  tracing-subscriber = { version = "*" }
+  indicatif          = { version = "*" }
+  tracing-indicatif  = { version = "*" }
