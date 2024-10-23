@@ -2,7 +2,7 @@
 #=== PACKAGE INFO ===#
 
 [package]
-  name = "logs"
+  name = "util_tracing"
   version.workspace = true
   edition.workspace = true
 

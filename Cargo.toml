@@ -33,8 +33,12 @@
 
 [workspace.dependencies]
   # CRATES
-  files              = { path = "crates/files", version = "0.1.0" }
-  logs               = { path = "crates/logs", version = "0.1.0" }
+  util_datafiles     = { path = "crates/files", version = "0.1.0" }
+  util_tracing       = { path = "crates/logs", version = "0.1.0" }
+  util_time          = { path = "crates/time", version = "0.1.0" }
+
+  # STANDARD
+  chrono             = { version = "*", features = ["serde"] }
 
   # NETWORK
   reqwest            = { version = "*" }
