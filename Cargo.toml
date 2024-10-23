@@ -34,7 +34,7 @@
 [workspace.dependencies]
   # CRATES
   util_datafiles     = { path = "crates/files", version = "0.1.0" }
-  util_tracing       = { path = "crates/logs", version = "0.1.0" }
+  util_logs          = { path = "crates/logs", version = "0.1.0" }
   util_time          = { path = "crates/time", version = "0.1.0" }
 
   # STANDARD
