@@ -83,7 +83,7 @@ impl skytable::query::SQParam for Year {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for Year {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: i32 = skytable::response::FromValue::from_value(resp)?;
+        let data: i32 = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from(data))
     }
 }
@@ -180,7 +180,7 @@ impl skytable::query::SQParam for Month {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for Month {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: u32 = skytable::response::FromValue::from_value(resp)?;
+        let data: u32 = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from(data))
     }
 }
@@ -238,7 +238,7 @@ impl skytable::query::SQParam for Day {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for Day {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: u32 = skytable::response::FromValue::from_value(resp)?;
+        let data: u32 = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from(data))
     }
 }
@@ -301,7 +301,7 @@ impl skytable::query::SQParam for Date {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for Date {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: String = skytable::response::FromValue::from_value(resp)?;
+        let data: String = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from_str(&data).unwrap())
     }
 }
@@ -357,7 +357,7 @@ impl skytable::query::SQParam for Hour {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for Hour {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: u32 = skytable::response::FromValue::from_value(resp)?;
+        let data: u32 = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from(data))
     }
 }
@@ -410,7 +410,7 @@ impl skytable::query::SQParam for Minute {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for Minute {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: u32 = skytable::response::FromValue::from_value(resp)?;
+        let data: u32 = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from(data))
     }
 }
@@ -463,7 +463,7 @@ impl skytable::query::SQParam for Second {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for Second {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: u32 = skytable::response::FromValue::from_value(resp)?;
+        let data: u32 = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from(data))
     }
 }
@@ -526,7 +526,7 @@ impl skytable::query::SQParam for Time {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for Time {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: String = skytable::response::FromValue::from_value(resp)?;
+        let data: String = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from_str(&data).unwrap())
     }
 }
@@ -597,7 +597,7 @@ impl skytable::query::SQParam for DateTime {
 #[cfg(feature = "skytable")]
 impl skytable::response::FromValue for DateTime {
     fn from_value(v: skytable::response::Value) -> skytable::ClientResult<Self> {
-        let data: String = skytable::response::FromValue::from_value(resp)?;
+        let data: String = skytable::response::FromValue::from_value(v)?;
         Ok(Self::from_str(&data).unwrap())
     }
 }
