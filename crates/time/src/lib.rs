@@ -74,6 +74,20 @@ impl AsMut<i32> for Year {
     }
 }
 
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for Year {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.0.append_param(q)
+    }
+}
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for Year {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: i32 = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from(data))
+    }
+}
+
 /// Type representing a month. Can be used in for serializing dates.
 #[derive(Eq, PartialEq, Hash, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Month(u32);
@@ -157,6 +171,20 @@ impl AsMut<u32> for Month {
     }
 }
 
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for Month {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.0.append_param(q)
+    }
+}
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for Month {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: u32 = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from(data))
+    }
+}
+
 /// Type representing a day. Can be used in for serializing dates.
 #[derive(Eq, PartialEq, Hash, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Day(u32);
@@ -198,6 +226,20 @@ impl AsRef<u32> for Day {
 impl AsMut<u32> for Day {
     fn as_mut(&mut self) -> &mut u32 {
         &mut self.0
+    }
+}
+
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for Day {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.0.append_param(q)
+    }
+}
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for Day {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: u32 = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from(data))
     }
 }
 
@@ -250,6 +292,19 @@ impl DerefMut for Date {
     }
 }
 
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for Date {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.to_string().append_param(q)
+    }
+}
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for Date {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: String = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from_str(&data).unwrap())
+    }
+}
 
 // #==================#
 // #=== TIME TYPES ===#
@@ -293,6 +348,20 @@ impl AsMut<u32> for Hour {
     }
 }
 
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for Hour {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.0.append_param(q)
+    }
+}
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for Hour {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: u32 = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from(data))
+    }
+}
+
 /// Type representing a minute. Can be used in for serializing time.
 #[derive(Eq, PartialEq, Hash, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Minute(u32);
@@ -332,6 +401,20 @@ impl AsMut<u32> for Minute {
     }
 }
 
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for Minute {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.0.append_param(q)
+    }
+}
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for Minute {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: u32 = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from(data))
+    }
+}
+
 /// Type representing a second. Can be used in for serializing time.
 #[derive(Eq, PartialEq, Hash, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Second(u32);
@@ -368,6 +451,20 @@ impl AsRef<u32> for Second {
 impl AsMut<u32> for Second {
     fn as_mut(&mut self) -> &mut u32 {
         &mut self.0
+    }
+}
+
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for Second {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.0.append_param(q)
+    }
+}
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for Second {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: u32 = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from(data))
     }
 }
 
@@ -420,6 +517,19 @@ impl DerefMut for Time {
     }
 }
 
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for Time {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.to_string().append_param(q)
+    }
+}
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for Time {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: String = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from_str(&data).unwrap())
+    }
+}
 
 // #=========================#
 // #=== DATE & TIME TYPES ===#
@@ -428,6 +538,7 @@ impl DerefMut for Time {
 /// Type representing a datetime. Can be used in for serializing dates.
 /// This type is guaranteed to be valid, otherwise cannot be initialized.
 #[derive(Eq, PartialEq, Hash, Debug, Clone, Copy, Serialize, Deserialize)]
+//#[cfg_attr(feature = "skytable", derive(Query, Response))]
 pub struct DateTime(ChronoDateTime<UtcTime>);
 impl DateTime {
     /// Returns the current UTC time
@@ -477,54 +588,16 @@ impl DerefMut for DateTime {
     }
 }
 
-
-
-/* 
-#[derive(Eq, PartialEq, Hash, Debug, Clone, Serialize, Deserialize)]
-pub struct DateTime(String);
-impl DateTime {
-    pub fn now() -> Self {
-        DateTime (chrono::Local::now().to_string())
-    }
-    pub fn from_now_minutes(minutes: i64) -> Self {
-        let current_time = chrono::Local::now();
-        DateTime((current_time + chrono::Duration::minutes(minutes)).to_string())
-    }
-    pub fn from_now_hours(hours: i64) -> Self {
-        let current_time = chrono::Local::now();
-        DateTime((current_time + chrono::Duration::hours(hours)).to_string())
-    }
-    fn into_chrono(self) -> chrono::DateTime<chrono::Local> {
-        <chrono::DateTime::<chrono::Local> as std::str::FromStr>::from_str(&self.0).unwrap()
-    }
-    pub fn elapsed_minutes(self) -> i64 {
-        let old: chrono::DateTime<chrono::Local> = self.into_chrono();
-        let now = chrono::Local::now();
-        let duration = now - old;
-        duration.num_minutes()
-    }
-    pub fn elapsed_hours(self) -> i64 {
-        let old: chrono::DateTime<chrono::Local> = self.into_chrono();
-        let now = chrono::Local::now();
-        let duration = now - old;
-        duration.num_hours()
-    }
-    pub fn elapsed_days(self) -> i64 {
-        let old: chrono::DateTime<chrono::Local> = self.into_chrono();
-        let now = chrono::Local::now();
-        let duration = now - old;
-        duration.num_days()
+#[cfg(feature = "skytable")]
+impl skytable::query::SQParam for DateTime {
+    fn append_param(&self, q: &mut Vec<u8>) -> usize {
+        self.to_string().append_param(q)
     }
 }
-impl From<DateTime> for String {
-    fn from(val: DateTime) -> Self {
-        val.0
+#[cfg(feature = "skytable")]
+impl skytable::response::FromResponse for DateTime {
+    fn from_response(resp: skytable::response::Response) -> skytable::ClientResult<Self> {
+        let data: String = skytable::response::FromResponse::from_response(resp)?;
+        Ok(Self::from_str(&data).unwrap())
     }
 }
-impl From<String> for DateTime {
-    fn from(value: String) -> Self {
-        DateTime(value)
-    }
-}
-
- */

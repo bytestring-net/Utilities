@@ -14,3 +14,7 @@
   thiserror          = { workspace = true }
   serde              = { workspace = true }
   chrono             = { workspace = true, features = ["serde"] }
+  skytable           = { workspace = true, optional = true }
+
+[features]
+  skytable = ["dep:skytable"]

@@ -52,6 +52,7 @@
   serde_json         = { version = "*", features = ["arbitrary_precision"] }
   bincode            = { version = "*" }
   toml               = { version = "*" }
+  skytable           = { version = "*" }
 
   # TERMINAL LOGS
   tracing            = { version = "*" }
