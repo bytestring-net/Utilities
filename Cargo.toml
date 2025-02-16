@@ -52,8 +52,7 @@
   serde_json         = { version = "*", features = ["arbitrary_precision"] }
   bincode            = { version = "*" }
   toml               = { version = "*" }
-  #skytable           = { version = "*" }
-  skytable = { git = "https://github.com/skytable/client-rust.git" }
+  skytable           = { version = "*" }
 
   # TERMINAL LOGS
   tracing            = { version = "*" }
