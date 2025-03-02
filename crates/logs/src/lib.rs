@@ -44,7 +44,7 @@ pub const BG_WHITE: &str = "\x1B[47m";
 
 /// Tracing info log with colored header.
 /// ```
-/// # use crate::info;
+/// # use util_logs::*;
 /// info!(BLUE, "CONFIG", "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
@@ -57,7 +57,7 @@ macro_rules! info {
                 trc::info!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
             }
             for line in iter {
-                trc::info!("{}{BOLD}{:>13}{RESET} {}", $color, "", line);
+                trc::info!("{:>13} {}", "", line);
             }
         }
     };
@@ -65,7 +65,7 @@ macro_rules! info {
 
 /// Tracing warning log with colored header.
 /// ```
-/// # use crate::warn;
+/// # use util_logs::*;
 /// warn!(YELLOW, "HTTP", "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
@@ -78,7 +78,7 @@ macro_rules! warn {
                 trc::warn!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
             }
             for line in iter {
-                trc::warn!("{}{BOLD}{:>13}{RESET} {}", $color, "", line);
+                trc::warn!("{:>13} {}", "", line);
             }
         }
     };
@@ -86,7 +86,7 @@ macro_rules! warn {
 
 /// Tracing error log with colored header.
 /// ```
-/// # use crate::error;
+/// # use util_logs::*;
 /// error!(RED, "CRASH", "Application panicked!")
 /// ```
 #[macro_export]
@@ -99,7 +99,7 @@ macro_rules! error {
                 trc::error!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
             }
             for line in iter {
-                trc::error!("{}{BOLD}{:>13}{RESET} {}", $color, "", line);
+                trc::error!("{:>13} {}", "", line);
             }
         }
     };
@@ -107,7 +107,7 @@ macro_rules! error {
 
 /// Tracing info log with colored header. Text can be colored too.
 /// ```
-/// # use crate::info_ext;
+/// # use util_logs::*;
 /// info_ext!(BLUE, "CONFIG", BLUE, "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
@@ -120,15 +120,15 @@ macro_rules! info_ext {
                 trc::info!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
             }
             for line in iter {
-                trc::info!("{}{BOLD}{:>13}{RESET} {}{}{RESET}", $color1, "", $color2, line);
+                trc::info!("{:>13} {}{}{RESET}", "", $color2, line);
             }
         }
     };
 }
 
-/// Tracing info log with colored header. Text can be colored too.
+/// Tracing warning log with colored header. Text can be colored too.
 /// ```
-/// # use crate::warn_ext;
+/// # use util_logs::*;
 /// warn_ext!(YELLOW, "HTTP", YELLOW, "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
@@ -141,15 +141,15 @@ macro_rules! warn_ext {
                 trc::warn!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
             }
             for line in iter {
-                trc::warn!("{}{BOLD}{:>13}{RESET} {}{}{RESET}", $color1, "", $color2, line);
+                trc::warn!("{:>13} {}{}{RESET}", "", $color2, line);
             }
         }
     };
 }
 
-/// Tracing info log with colored header. Text can be colored too.
+/// Tracing error log with colored header. Text can be colored too.
 /// ```
-/// # use crate::error_ext;
+/// # use util_logs::*;
 /// error_ext!(RED, "CRASH", RED, "Application panicked!")
 /// ```
 #[macro_export]
@@ -162,7 +162,61 @@ macro_rules! error_ext {
                 trc::error!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
             }
             for line in iter {
-                trc::error!("{}{BOLD}{:>13}{RESET} {}{}{RESET}", $color1, "", $color2, line);
+                trc::error!("{:>13} {}{}{RESET}", "", $color2, line);
+            }
+        }
+    };
+}
+
+/// Tracing info log with colored text.
+/// ```
+/// # use util_logs::*;
+/// info_ext_blank!(BLUE, "Could not open {}", "config.txt")
+/// ```
+#[macro_export]
+macro_rules! info_ext_blank {
+    ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
+        {
+            let message = format!($fmt $(, $arg)*);
+            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
+            for line in iter {
+                trc::info!("{:>13} {}{}{RESET}", "", $color2, line);
+            }
+        }
+    };
+}
+
+/// Tracing warning log with colored text.
+/// ```
+/// # use util_logs::*;
+/// warn_ext_blank!(YELLOW, "Unable to ping {}", "http://foo.bar")
+/// ```
+#[macro_export]
+macro_rules! warn_ext_blank {
+    ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
+        {
+            let message = format!($fmt $(, $arg)*);
+            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
+            for line in iter {
+                trc::warn!("{:>13} {}{}{RESET}", "", $color2, line);
+            }
+        }
+    };
+}
+
+/// Tracing error log with colored text.
+/// ```
+/// # use util_logs::*;
+/// error_ext_blank!(RED, "Application panicked!")
+/// ```
+#[macro_export]
+macro_rules! error_ext_blank {
+    ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
+        {
+            let message = format!($fmt $(, $arg)*);
+            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
+            for line in iter {
+                trc::error!("{:>13} {}{}{RESET}", "", $color2, line);
             }
         }
     };
