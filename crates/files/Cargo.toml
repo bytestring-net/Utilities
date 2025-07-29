@@ -2,7 +2,7 @@
 #=== PACKAGE INFO ===#
 
 [package]
-  name = "util_datafiles"
+  name = "util_files"
   version.workspace = true
   edition.workspace = true
 

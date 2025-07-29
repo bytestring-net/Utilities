@@ -1,12 +1,19 @@
-use std::fmt::Write;
-
+use chrono::Local;
 use tracing::Level;
 use tracing::Subscriber;
 use tracing_subscriber::fmt;
 use tracing_subscriber::registry::LookupSpan;
-use indicatif::{ProgressState, ProgressStyle};
 
-pub mod trc {
+// Reexport tracing macros and structs
+pub use tracing::instrument;
+pub use tracing::instrument::Instrument;
+pub use tracing::{
+    debug, debug_span, error, error_span, info, info_span, trace, trace_span, warn, warn_span,
+};
+
+// Reeport the whole crate
+extern crate tracing;
+pub mod tr {
     pub use tracing::*;
 }
 
@@ -38,233 +45,206 @@ pub const BG_MAGENTA: &str = "\x1B[45m";
 pub const BG_CYAN: &str = "\x1B[46m";
 pub const BG_WHITE: &str = "\x1B[47m";
 
-
 // #======================#
 // #=== LOGGING MACROS ===#
 
-/// Tracing info log with colored header.
+/// ## Header Info
+/// Tracing info log variant with colored header.
 /// ```
-/// # use util_logs::*;
-/// info!(BLUE, "CONFIG", "Could not open {}", "config.txt")
+/// # use tracing_logs::*;
+/// hinfo!(BLUE, "CONFIG", "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
-macro_rules! info {
+macro_rules! hinfo {
     ($color:expr, $label:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             if let Some(line) = iter.next() {
-                trc::info!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
+                tr::info!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
             }
             for line in iter {
-                trc::info!("{:>13} {}", "", line);
+                tr::info!("{:>13} {}", "", line);
             }
         }
     };
 }
 
-/// Tracing warning log with colored header.
+/// ## Header Warning
+/// Tracing warn log variant with colored header.
 /// ```
-/// # use util_logs::*;
-/// warn!(YELLOW, "HTTP", "Unable to ping {}", "http://foo.bar")
+/// # use tracing_logs::*;
+/// hwarn!(YELLOW, "HTTP", "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
-macro_rules! warn {
+macro_rules! hwarn {
     ($color:expr, $label:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             if let Some(line) = iter.next() {
-                trc::warn!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
+                tr::warn!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
             }
             for line in iter {
-                trc::warn!("{:>13} {}", "", line);
+                tr::warn!("{:>13} {}", "", line);
             }
         }
     };
 }
 
-/// Tracing error log with colored header.
+/// ## Header Error
+/// Tracing error log variant with colored header.
 /// ```
-/// # use util_logs::*;
-/// error!(RED, "CRASH", "Application panicked!")
+/// # use tracing_logs::*;
+/// herror!(RED, "CRASH", "Application panicked!")
 /// ```
 #[macro_export]
-macro_rules! error {
+macro_rules! herror {
     ($color:expr, $label:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             if let Some(line) = iter.next() {
-                trc::error!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
+                tr::error!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
             }
             for line in iter {
-                trc::error!("{:>13} {}", "", line);
+                tr::error!("{:>13} {}", "", line);
             }
         }
     };
 }
 
-/// Tracing info log with colored header. Text can be colored too.
+/// ## Header Info Extended
+/// Tracing info log variant with colored header. Text can be colored too.
 /// ```
-/// # use util_logs::*;
-/// info_ext!(BLUE, "CONFIG", BLUE, "Could not open {}", "config.txt")
+/// # use tracing_logs::*;
+/// hinfo_ext!(BLUE, "CONFIG", BLUE, "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
-macro_rules! info_ext {
+macro_rules! hinfo_ext {
     ($color1:expr, $label:expr, $color2:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             if let Some(line) = iter.next() {
-                trc::info!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
+                tr::info!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
             }
             for line in iter {
-                trc::info!("{:>13} {}{}{RESET}", "", $color2, line);
+                tr::info!("{:>13} {}{}{RESET}", "", $color2, line);
             }
         }
     };
 }
 
-/// Tracing warning log with colored header. Text can be colored too.
+/// ## Header Warning Extended
+/// Tracing warn log variant with colored header. Text can be colored too.
 /// ```
-/// # use util_logs::*;
-/// warn_ext!(YELLOW, "HTTP", YELLOW, "Unable to ping {}", "http://foo.bar")
+/// # use tracing_logs::*;
+/// hwarn_ext!(YELLOW, "HTTP", YELLOW, "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
-macro_rules! warn_ext {
+macro_rules! hwarn_ext {
     ($color1:expr, $label:expr, $color2:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             if let Some(line) = iter.next() {
-                trc::warn!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
+                tr::warn!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
             }
             for line in iter {
-                trc::warn!("{:>13} {}{}{RESET}", "", $color2, line);
+                tr::warn!("{:>13} {}{}{RESET}", "", $color2, line);
             }
         }
     };
 }
 
-/// Tracing error log with colored header. Text can be colored too.
+/// ## Header Error Extended
+/// Tracing error log variant with colored header. Text can be colored too.
 /// ```
-/// # use util_logs::*;
-/// error_ext!(RED, "CRASH", RED, "Application panicked!")
+/// # use tracing_logs::*;
+/// herror_ext!(RED, "CRASH", RED, "Application panicked!")
 /// ```
 #[macro_export]
-macro_rules! error_ext {
+macro_rules! herror_ext {
     ($color1:expr, $label:expr, $color2:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             if let Some(line) = iter.next() {
-                trc::error!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
+                tr::error!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
             }
             for line in iter {
-                trc::error!("{:>13} {}{}{RESET}", "", $color2, line);
+                tr::error!("{:>13} {}{}{RESET}", "", $color2, line);
             }
         }
     };
 }
 
-/// Tracing info log with colored text.
+/// ## Info Colored
+/// Tracing info log variant with colored text.
 /// ```
-/// # use util_logs::*;
-/// info_ext_blank!(BLUE, "Could not open {}", "config.txt")
+/// # use tracing_logs::*;
+/// cinfo!(BLUE, "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
-macro_rules! info_ext_blank {
+macro_rules! cinfo {
     ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             for line in iter {
-                trc::info!("{:>13} {}{}{RESET}", "", $color2, line);
+                tr::info!("{}{}{RESET}", $color2, line);
             }
         }
     };
 }
 
-/// Tracing warning log with colored text.
+/// ## Warning Colored
+/// Tracing warn log variant with colored text.
 /// ```
-/// # use util_logs::*;
-/// warn_ext_blank!(YELLOW, "Unable to ping {}", "http://foo.bar")
+/// # use tracing_logs::*;
+/// cwarn!(YELLOW, "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
-macro_rules! warn_ext_blank {
+macro_rules! cwarn {
     ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             for line in iter {
-                trc::warn!("{:>13} {}{}{RESET}", "", $color2, line);
+                tr::warn!("{}{}{RESET}", $color2, line);
             }
         }
     };
 }
 
-/// Tracing error log with colored text.
+/// ## Error Colored
+/// Tracing error log variant with colored text.
 /// ```
-/// # use util_logs::*;
-/// error_ext_blank!(RED, "Application panicked!")
+/// # use tracing_logs::*;
+/// cerror!(RED, "Application panicked!")
 /// ```
 #[macro_export]
-macro_rules! error_ext_blank {
+macro_rules! cerror {
     ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
         {
             let message = format!($fmt $(, $arg)*);
             let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
             for line in iter {
-                trc::error!("{:>13} {}{}{RESET}", "", $color2, line);
+                tr::error!("{}{}{RESET}", $color2, line);
             }
         }
     };
 }
-
-
-// #=======================#
-// #=== SPECIAL LOGGING ===#
-
-/// Log HTTP StatusCode and colorise the output based on code
-#[cfg(feature = "reqwest")]
-pub fn log_status(status: reqwest::StatusCode, body: &String) {
-    if !status.is_success() {
-        let text = status.canonical_reason().unwrap_or_default();
-        warn!(RED, format!("HTTP {}", status.as_u16()), "{text}\n{body}");
-    }
-}
-
-
-// #=====================#
-// #=== PROGRESS BARS ===#
-
-/// Return the style of iteration like progress bar
-pub fn empty_bar() -> ProgressStyle {
-    ProgressStyle::with_template("").unwrap()
-}
-
-/// Return the style of iteration like progress bar
-pub fn progress_bar() -> ProgressStyle {
-    ProgressStyle::with_template("\n {spinner:.green} [{elapsed_precise:.bold.cyan}]: [{wide_bar:.cyan/blue}] {human_pos}/{human_len} ({eta} left)\n\n\n").unwrap()
-        .with_key("eta", |state: &ProgressState, w: &mut dyn Write| write!(w, "{:.1}s", state.eta().as_secs_f64()).unwrap())
-        .progress_chars("#>-")
-}
-
-/// Return the style of a download like progress bar
-pub fn download_bar() -> ProgressStyle {
-    ProgressStyle::with_template("\n {spinner:.green} [{elapsed_precise:.bold.cyan}]: [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({eta} left)\n\n\n").unwrap()
-        .with_key("eta", |state: &ProgressState, w: &mut dyn Write| write!(w, "{:.1}s", state.eta().as_secs_f64()).unwrap())
-        .progress_chars("#>-")
-}
-
 
 // #=========================#
 // #=== TRACING FORMATTER ===#
 
 use tracing::level_filters::LevelFilter;
-use tracing_indicatif::IndicatifLayer;
-use tracing_subscriber::{layer::SubscriberExt, util::{TryInitError, SubscriberInitExt}};
+use tracing_subscriber::{
+    layer::SubscriberExt,
+    util::{SubscriberInitExt, TryInitError},
+};
 
 /// Initialize tracing subscriber.
 pub fn tracing_init() {
@@ -273,48 +253,55 @@ pub fn tracing_init() {
 
 /// Try to initialize tracing subscriber.
 pub fn try_tracing_init() -> Result<(), TryInitError> {
-    // Create the IndicatifLayer
-    let indicatif_layer = IndicatifLayer::new();
-
     // Create the formatted logging layer
-    let fmt_layer = tracing_subscriber::fmt::layer()
-        .with_writer(indicatif_layer.get_stderr_writer())
-        .event_format(TracingFormatter);
+    let fmt_layer = tracing_subscriber::fmt::layer().event_format(TracingFormatter);
 
     // Create the tracing registry
     tracing_subscriber::registry()
         .with(fmt_layer)
-        .with(indicatif_layer)
         .with(LevelFilter::INFO)
         .try_init()
 }
 
 pub struct TracingFormatter;
-impl<S, N> fmt::FormatEvent<S, N> for TracingFormatter where S: Subscriber + for<'a> LookupSpan<'a>, N: for<'a> fmt::FormatFields<'a> + 'static {
-    fn format_event(&self, ctx: &fmt::FmtContext<'_, S, N>, mut writer: fmt::format::Writer<'_>, event: &tracing::Event<'_>) -> std::fmt::Result {
+impl<S, N> fmt::FormatEvent<S, N> for TracingFormatter
+where
+    S: Subscriber + for<'a> LookupSpan<'a>,
+    N: for<'a> fmt::FormatFields<'a> + 'static,
+{
+    fn format_event(
+        &self,
+        ctx: &fmt::FmtContext<'_, S, N>,
+        mut writer: fmt::format::Writer<'_>,
+        event: &tracing::Event<'_>,
+    ) -> std::fmt::Result {
         // Format values from the event's's metadata:
         let metadata = event.metadata();
 
+        // Write the timestamp
+        let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S");
+        write!(&mut writer, "{DIM}{timestamp}{RESET} ")?;
+
         // Write the event level
         match *metadata.level() {
-            Level::INFO => write!(&mut writer, "{GREEN}{:>5}{RESET} | ", metadata.level()),
-            Level::WARN => write!(&mut writer, "{YELLOW}{:>5}{RESET} | ", metadata.level()),
-            Level::ERROR => write!(&mut writer, "{RED}{:>5}{RESET} | ", metadata.level()),
-            _ => write!(&mut writer, "{} | ", metadata.level()),
+            Level::INFO => write!(&mut writer, "{GREEN}{:>5}{RESET} ", metadata.level()),
+            Level::WARN => write!(&mut writer, "{YELLOW}{:>5}{RESET} ", metadata.level()),
+            Level::ERROR => write!(&mut writer, "{RED}{:>5}{RESET} ", metadata.level()),
+            _ => write!(&mut writer, "{} ", metadata.level()),
         }?;
 
-        // Count number of spans
-        let mut spans = 0;
+        write!(writer, "{DIM}>> ")?;
         if let Some(scope) = ctx.event_scope() {
-            spans = scope.from_root().count();
+            let mut iter = scope.from_root().peekable();
+            while let Some(sp) = iter.next() {
+                if iter.peek().is_some() {
+                    write!(writer, "{} > ", sp.name())?;
+                } else {
+                    write!(writer, "{}", sp.name())?;
+                }
+            }
         }
-
-        // Add the span column
-        if spans <= 3 {
-            write!(writer, "{:<3} ⣿⣿ ", ">".repeat(spans))?;
-        } else {
-            write!(writer, ">>{} ⣿⣿ ", spans - 2)?;
-        }
+        write!(writer, " ⣿ {RESET}")?;
 
         // Write fields on the event
         ctx.field_format().format_fields(writer.by_ref(), event)?;
