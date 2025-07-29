@@ -51,7 +51,7 @@ pub const BG_WHITE: &str = "\x1B[47m";
 /// ## Header Info
 /// Tracing info log variant with colored header.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// hinfo!(BLUE, "CONFIG", "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
@@ -73,7 +73,7 @@ macro_rules! hinfo {
 /// ## Header Warning
 /// Tracing warn log variant with colored header.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// hwarn!(YELLOW, "HTTP", "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
@@ -95,7 +95,7 @@ macro_rules! hwarn {
 /// ## Header Error
 /// Tracing error log variant with colored header.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// herror!(RED, "CRASH", "Application panicked!")
 /// ```
 #[macro_export]
@@ -117,7 +117,7 @@ macro_rules! herror {
 /// ## Header Info Extended
 /// Tracing info log variant with colored header. Text can be colored too.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// hinfo_ext!(BLUE, "CONFIG", BLUE, "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
@@ -139,7 +139,7 @@ macro_rules! hinfo_ext {
 /// ## Header Warning Extended
 /// Tracing warn log variant with colored header. Text can be colored too.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// hwarn_ext!(YELLOW, "HTTP", YELLOW, "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
@@ -161,7 +161,7 @@ macro_rules! hwarn_ext {
 /// ## Header Error Extended
 /// Tracing error log variant with colored header. Text can be colored too.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// herror_ext!(RED, "CRASH", RED, "Application panicked!")
 /// ```
 #[macro_export]
@@ -183,7 +183,7 @@ macro_rules! herror_ext {
 /// ## Info Colored
 /// Tracing info log variant with colored text.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// cinfo!(BLUE, "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
@@ -202,7 +202,7 @@ macro_rules! cinfo {
 /// ## Warning Colored
 /// Tracing warn log variant with colored text.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// cwarn!(YELLOW, "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
@@ -221,7 +221,7 @@ macro_rules! cwarn {
 /// ## Error Colored
 /// Tracing error log variant with colored text.
 /// ```
-/// # use tracing_logs::*;
+/// # use util_logs::*;
 /// cerror!(RED, "Application panicked!")
 /// ```
 #[macro_export]
