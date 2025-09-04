@@ -1,15 +1,17 @@
+use std::fmt::Write;
+
 use chrono::Local;
 use tracing::Level;
 use tracing::Subscriber;
+use tracing::field::Field;
+use tracing::field::Visit;
 use tracing_subscriber::fmt;
 use tracing_subscriber::registry::LookupSpan;
 
 // Reexport tracing macros and structs
 pub use tracing::instrument;
 pub use tracing::instrument::Instrument;
-pub use tracing::{
-    debug, debug_span, error, error_span, info, info_span, trace, trace_span, warn, warn_span,
-};
+pub use tracing::{debug, debug_span, error, error_span, info, info_span, trace, trace_span, warn, warn_span};
 
 // Reeport the whole crate
 extern crate tracing;
@@ -51,189 +53,153 @@ pub const BG_WHITE: &str = "\x1B[47m";
 /// ## Header Info
 /// Tracing info log variant with colored header.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// hinfo!(BLUE, "CONFIG", "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
 macro_rules! hinfo {
     ($color:expr, $label:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            if let Some(line) = iter.next() {
-                tr::info!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
-            }
-            for line in iter {
-                tr::info!("{:>13} {}", "", line);
-            }
-        }
+        tr::info!(
+            _header_color = $color,
+            _header_text = $label,
+            $fmt $(, $arg)*
+        );
     };
 }
 
 /// ## Header Warning
 /// Tracing warn log variant with colored header.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// hwarn!(YELLOW, "HTTP", "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
 macro_rules! hwarn {
     ($color:expr, $label:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            if let Some(line) = iter.next() {
-                tr::warn!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
-            }
-            for line in iter {
-                tr::warn!("{:>13} {}", "", line);
-            }
-        }
+        tr::warn!(
+            _header_color = $color,
+            _header_text = $label,
+            $fmt $(, $arg)*
+        );
     };
 }
 
 /// ## Header Error
 /// Tracing error log variant with colored header.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// herror!(RED, "CRASH", "Application panicked!")
 /// ```
 #[macro_export]
 macro_rules! herror {
     ($color:expr, $label:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            if let Some(line) = iter.next() {
-                tr::error!("{}{BOLD}{:>12}:{RESET} {}", $color, format!("[{}]", $label), line);
-            }
-            for line in iter {
-                tr::error!("{:>13} {}", "", line);
-            }
-        }
+        tr::error!(
+            _header_color = $color,
+            _header_text = $label,
+            $fmt $(, $arg)*
+        );
     };
 }
 
 /// ## Header Info Extended
 /// Tracing info log variant with colored header. Text can be colored too.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// hinfo_ext!(BLUE, "CONFIG", BLUE, "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
 macro_rules! hinfo_ext {
     ($color1:expr, $label:expr, $color2:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            if let Some(line) = iter.next() {
-                tr::info!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
-            }
-            for line in iter {
-                tr::info!("{:>13} {}{}{RESET}", "", $color2, line);
-            }
-        }
+        tr::info!(
+            _header_color = $color1,
+            _text_color = $color2,
+            _header_text = $label,
+            $fmt $(, $arg)*
+        );
     };
 }
 
 /// ## Header Warning Extended
 /// Tracing warn log variant with colored header. Text can be colored too.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// hwarn_ext!(YELLOW, "HTTP", YELLOW, "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
 macro_rules! hwarn_ext {
     ($color1:expr, $label:expr, $color2:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            if let Some(line) = iter.next() {
-                tr::warn!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
-            }
-            for line in iter {
-                tr::warn!("{:>13} {}{}{RESET}", "", $color2, line);
-            }
-        }
+        tr::warn!(
+            _header_color = $color1,
+            _text_color = $color2,
+            _header_text = $label,
+            $fmt $(, $arg)*
+        );
     };
 }
 
 /// ## Header Error Extended
 /// Tracing error log variant with colored header. Text can be colored too.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// herror_ext!(RED, "CRASH", RED, "Application panicked!")
 /// ```
 #[macro_export]
 macro_rules! herror_ext {
     ($color1:expr, $label:expr, $color2:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            if let Some(line) = iter.next() {
-                tr::error!("{}{BOLD}{:>12}:{RESET} {}{}{RESET}", $color1, format!("[{}]", $label), $color2, line);
-            }
-            for line in iter {
-                tr::error!("{:>13} {}{}{RESET}", "", $color2, line);
-            }
-        }
+        tr::error!(
+            _header_color = $color1,
+            _text_color = $color2,
+            _header_text = $label,
+            $fmt $(, $arg)*
+        );
     };
 }
 
 /// ## Info Colored
 /// Tracing info log variant with colored text.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// cinfo!(BLUE, "Could not open {}", "config.txt")
 /// ```
 #[macro_export]
 macro_rules! cinfo {
-    ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            for line in iter {
-                tr::info!("{}{}{RESET}", $color2, line);
-            }
-        }
+    ($color:expr, $fmt:expr $(, $arg:expr)*) => {
+        tr::info!(
+            _text_color = $color,
+            $fmt $(, $arg)*
+        );
     };
 }
 
 /// ## Warning Colored
 /// Tracing warn log variant with colored text.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// cwarn!(YELLOW, "Unable to ping {}", "http://foo.bar")
 /// ```
 #[macro_export]
 macro_rules! cwarn {
-    ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            for line in iter {
-                tr::warn!("{}{}{RESET}", $color2, line);
-            }
-        }
+    ($color:expr, $fmt:expr $(, $arg:expr)*) => {
+        tr::warn!(
+            _text_color = $color,
+            $fmt $(, $arg)*
+        );
     };
 }
 
 /// ## Error Colored
 /// Tracing error log variant with colored text.
 /// ```
-/// # use util_logs::*;
+/// # use tracing_logs::*;
 /// cerror!(RED, "Application panicked!")
 /// ```
 #[macro_export]
 macro_rules! cerror {
-    ($color2:expr, $fmt:expr $(, $arg:expr)*) => {
-        {
-            let message = format!($fmt $(, $arg)*);
-            let mut iter = message.split('\n').collect::<Vec<&str>>().into_iter();
-            for line in iter {
-                tr::error!("{}{}{RESET}", $color2, line);
-            }
-        }
+    ($color:expr, $fmt:expr $(, $arg:expr)*) => {
+        tr::error!(
+            _text_color = $color,
+            $fmt $(, $arg)*
+        );
     };
 }
 
@@ -247,21 +213,56 @@ use tracing_subscriber::{
 };
 
 /// Initialize tracing subscriber.
-pub fn tracing_init() {
-    try_tracing_init().unwrap();
+pub fn tracing_init(binary_name: impl Into<String>) {
+    try_tracing_init(binary_name).unwrap();
 }
 
 /// Try to initialize tracing subscriber.
-pub fn try_tracing_init() -> Result<(), TryInitError> {
+pub fn try_tracing_init(binary_name: impl Into<String>) -> Result<(), TryInitError> {
     // Create the formatted logging layer
-    let fmt_layer = tracing_subscriber::fmt::layer().event_format(TracingFormatter);
+    let fmt_layer = tracing_subscriber::fmt::layer().event_format(TracingFormatter { binary_name: binary_name.into() });
 
     // Create the tracing registry
-    tracing_subscriber::registry()
-        .with(fmt_layer)
-        .with(LevelFilter::INFO)
-        .try_init()
+    tracing_subscriber::registry().with(fmt_layer).with(LevelFilter::INFO).try_init()
 }
+
+
+struct ConfigExtractor<'a> {
+    buf: &'a mut String,
+    text_color: Option<String>,
+    header_color: Option<String>,
+    header_text: Option<String>,
+}
+
+impl<'a> Visit for ConfigExtractor<'a> {
+    fn record_debug(&mut self, field: &Field, value: &dyn std::fmt::Debug) {
+        if field.name() == "message" {
+            write!(self.buf, "{:?}", value).unwrap();
+        } else {
+            write!(self.buf, ", {} = {:?}", field.name(), value).unwrap();
+        }
+    }
+    fn record_str(&mut self, field: &Field, value: &str) {
+        match field.name() {
+            "_text_color" => {
+                self.text_color = Some(value.to_string());
+            },
+            "_header_color" => {
+                self.header_color = Some(value.to_string());
+            },
+            "_header_text" => {
+                self.header_text = Some(value.to_string());
+            },
+            "message" => {
+                write!(self.buf, "{}", value).unwrap();
+            },
+            _ => {
+                write!(self.buf, ", {} = {}", field.name(), value).unwrap();
+            },
+        }
+    }
+}
+
 
 pub struct TracingFormatter;
 impl<S, N> fmt::FormatEvent<S, N> for TracingFormatter
@@ -269,42 +270,75 @@ where
     S: Subscriber + for<'a> LookupSpan<'a>,
     N: for<'a> fmt::FormatFields<'a> + 'static,
 {
-    fn format_event(
-        &self,
-        ctx: &fmt::FmtContext<'_, S, N>,
-        mut writer: fmt::format::Writer<'_>,
-        event: &tracing::Event<'_>,
-    ) -> std::fmt::Result {
+    fn format_event(&self, ctx: &fmt::FmtContext<'_, S, N>, mut writer: fmt::format::Writer<'_>, event: &tracing::Event<'_>) -> std::fmt::Result {
         // Format values from the event's's metadata:
         let metadata = event.metadata();
 
-        // Write the timestamp
+        // Timestamp & Name
         let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S");
-        write!(&mut writer, "{DIM}{timestamp}{RESET} ")?;
+        let mut prefix = String::new();
+        write!(prefix, "{DIM}{timestamp}{RESET} ")?;
 
-        // Write the event level
+        // Extract the fields
+        let mut fields_buf = String::new();
+        let mut visitor = ConfigExtractor { buf: &mut fields_buf, text_color: None, header_color: None, header_text: None };
+        event.record(&mut visitor);
+
         match *metadata.level() {
-            Level::INFO => write!(&mut writer, "{GREEN}{:>5}{RESET} ", metadata.level()),
-            Level::WARN => write!(&mut writer, "{YELLOW}{:>5}{RESET} ", metadata.level()),
-            Level::ERROR => write!(&mut writer, "{RED}{:>5}{RESET} ", metadata.level()),
-            _ => write!(&mut writer, "{} ", metadata.level()),
+            Level::INFO => write!(prefix, "{GREEN}{:>5}{RESET} ", metadata.level()),
+            Level::WARN => write!(prefix, "{YELLOW}{:>5}{RESET} ", metadata.level()),
+            Level::ERROR => write!(prefix, "{RED}{:>5}{RESET} ", metadata.level()),
+            _ => write!(prefix, "{} ", metadata.level()),
         }?;
 
-        write!(writer, "{DIM}>> ")?;
+        write!(prefix, "{DIM}>> ")?;
         if let Some(scope) = ctx.event_scope() {
             let mut iter = scope.from_root().peekable();
             while let Some(sp) = iter.next() {
                 if iter.peek().is_some() {
-                    write!(writer, "{} > ", sp.name())?;
+                    write!(prefix, "{} > ", sp.name())?;
                 } else {
-                    write!(writer, "{}", sp.name())?;
+                    write!(prefix, "{}", sp.name())?;
                 }
             }
         }
-        write!(writer, " ⣿ {RESET}")?;
+        write!(prefix, " ⣿ {RESET}")?;
 
-        // Write fields on the event
-        ctx.field_format().format_fields(writer.by_ref(), event)?;
-        writeln!(writer)
+        if let Some(text_color) = visitor.text_color {
+            if let Some(header_color) = visitor.header_color
+                && let Some(header_text) = visitor.header_text
+            {
+                let header = format!("{}{BOLD}{:>12}:{RESET} ", header_color, format!("[{}]", header_text));
+                let mut iterator = fields_buf.lines();
+                if let Some(line) = iterator.next() {
+                    writeln!(writer, "{prefix} {header}{text_color}{line}{RESET}")?;
+                }
+                for line in iterator {
+                    writeln!(writer, "{prefix} {text_color}{line}{RESET}")?;
+                }
+            } else {
+                for line in fields_buf.lines() {
+                    writeln!(writer, "{prefix} {text_color}{line}{RESET}")?;
+                }
+            }
+        } else if let Some(header_color) = visitor.header_color
+            && let Some(header_text) = visitor.header_text
+        {
+            let header = format!("{}{BOLD}{:>12}:{RESET} ", header_color, format!("[{}]", header_text));
+            let mut iterator = fields_buf.lines();
+            if let Some(line) = iterator.next() {
+                writeln!(writer, "{prefix} {header}{line}{RESET}")?;
+            }
+            for line in iterator {
+                writeln!(writer, "{prefix} {line}{RESET}")?;
+            }
+        } else {
+            for line in fields_buf.lines() {
+                writeln!(writer, "{prefix} {line}{RESET}")?;
+            }
+        }
+
+
+        Ok(())
     }
 }
