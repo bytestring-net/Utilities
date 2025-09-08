@@ -213,14 +213,14 @@ use tracing_subscriber::{
 };
 
 /// Initialize tracing subscriber.
-pub fn tracing_init(binary_name: impl Into<String>) {
-    try_tracing_init(binary_name).unwrap();
+pub fn tracing_init() {
+    try_tracing_init().unwrap();
 }
 
 /// Try to initialize tracing subscriber.
-pub fn try_tracing_init(binary_name: impl Into<String>) -> Result<(), TryInitError> {
+pub fn try_tracing_init() -> Result<(), TryInitError> {
     // Create the formatted logging layer
-    let fmt_layer = tracing_subscriber::fmt::layer().event_format(TracingFormatter { binary_name: binary_name.into() });
+    let fmt_layer = tracing_subscriber::fmt::layer().event_format(TracingFormatter);
 
     // Create the tracing registry
     tracing_subscriber::registry().with(fmt_layer).with(LevelFilter::INFO).try_init()
